@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompter Wideo</title>
+<style>
+:root {
+  --bg: #0a0a0a; --s1: #141420; --s2: #1a1a2e; --s3: #222240;
+  --y: #ffd60a; --yd: #b8960a; --r: #e94560; --g: #00c853; --b: #0f3460;
+  --t1: #f0f0f0; --t2: #aaa; --t3: #666; --brd: #2a2a3e; --radius: 8px;
+  --free: #00e676;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;padding:16px;max-width:1200px;margin:0 auto}
+h1{text-align:center;font-size:26px;font-weight:800;color:var(--y);margin-bottom:2px;letter-spacing:1px}
+.sub{text-align:center;color:var(--t3);font-size:12px;margin-bottom:20px}
+.tabs{display:flex;gap:3px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
+.tab{padding:8px 14px;background:var(--s1);border:1px solid var(--brd);border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--t2);transition:.2s;font-weight:600}
+.tab:hover{border-color:var(--y);color:var(--t1)}
+.tab.active{background:var(--y);color:#000;border-color:var(--y)}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--s1);border:1px solid var(--brd);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card h2{font-size:15px;color:var(--y);margin-bottom:12px;font-weight:700}
+.card h3{font-size:13px;color:var(--t2);margin-bottom:8px;margin-top:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+label{display:block;font-size:11px;color:var(--t3);margin:10px 0 3px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+label:first-child{margin-top:0}
+select,input[type=text],input[type=number],textarea{width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--brd);border-radius:5px;color:var(--t1);font-size:13px;font-family:inherit}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--y)}
+textarea{resize:vertical;min-height:60px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tag{padding:4px 10px;background:var(--s2);border:1px solid var(--brd);border-radius:16px;font-size:11px;cursor:pointer;transition:.2s;user-select:none;line-height:1.4}
+.tag:hover{border-color:var(--y)}
+.tag.sel{background:var(--y);border-color:var(--y);color:#000;font-weight:600}
+.tag-group{margin-top:8px}
+.tag-group-title{font-size:10px;color:var(--yd);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.btn{padding:9px 18px;border:none;border-radius:5px;font-size:13px;cursor:pointer;font-weight:700;transition:.2s}
+.btn-y{background:var(--y);color:#000}.btn-y:hover{background:#e6c009}
+.btn-b{background:var(--b);color:#fff}.btn-b:hover{background:#1a5090}
+.btn-g{background:transparent;border:1px solid var(--brd);color:var(--t2)}.btn-g:hover{border-color:var(--y);color:var(--t1)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.out-label{font-size:10px;color:var(--y);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:4px}
+.out-box{background:#050510;border:1px solid var(--brd);border-radius:5px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word;min-height:70px;font-family:'Cascadia Code','Fira Code','Consolas',monospace}
+.toast{position:fixed;top:16px;right:16px;background:var(--g);color:#000;padding:8px 16px;border-radius:5px;font-weight:700;font-size:12px;z-index:999;animation:fade 1.5s forwards}
+@keyframes fade{0%,70%{opacity:1}100%{opacity:0}}
+.chk{display:flex;align-items:center;gap:6px;margin-top:8px}
+.chk input{width:15px;height:15px;accent-color:var(--y)}
+.chk label{margin:0;font-size:12px;color:var(--t1);text-transform:none;letter-spacing:0;font-weight:400}
+.info{background:var(--s2);border-left:3px solid var(--y);padding:10px 12px;font-size:12px;color:var(--t2);line-height:1.6;border-radius:0 5px 5px 0;margin-top:10px}
+.info strong{color:var(--y)}
+.pillar{display:inline-block;padding:3px 8px;background:var(--s3);border:1px solid var(--yd);border-radius:4px;font-size:10px;color:var(--yd);font-weight:700;margin-right:4px;letter-spacing:.5px}
+.rec-box{background:linear-gradient(135deg,#0a1628,#1a1a2e);border:1px solid var(--y);border-radius:var(--radius);padding:14px;margin-top:12px;font-size:12px;line-height:1.7}
+.rec-box .rec-title{color:var(--y);font-weight:700;font-size:13px;margin-bottom:8px}
+.rec-model{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--s3);border:1px solid var(--brd);border-radius:5px;margin:3px 2px;font-size:12px;cursor:pointer;transition:.2s}
+.rec-model:hover{border-color:var(--y)}
+.rec-model.best{border-color:var(--y);background:rgba(255,214,10,.1)}
+.badge-free{background:var(--free);color:#000;font-size:9px;font-weight:800;padding:1px 5px;border-radius:3px;text-transform:uppercase}
+.badge-credits{background:var(--r);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:3px}
+.rec-reason{color:var(--t2);font-size:11px;margin-top:4px}
+.rec-ext{margin-top:8px;padding-top:8px;border-top:1px solid var(--brd)}
+.rec-ext-title{color:var(--r);font-weight:700;font-size:11px;margin-bottom:4px}
+.ext-tool{color:var(--t2);font-size:11px;margin:2px 0}
+.ext-tool a{color:var(--y);text-decoration:none}
+.ext-tool a:hover{text-decoration:underline}
+.drop-zone{border:2px dashed var(--brd);border-radius:var(--radius);padding:24px;text-align:center;color:var(--t3);font-size:12px;cursor:pointer;transition:.2s;margin-top:8px;position:relative}
+.drop-zone:hover,.drop-zone.over{border-color:var(--y);color:var(--t2)}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop-zone img{max-width:100%;max-height:200px;border-radius:5px;margin-top:8px}
+.model-toggle{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brd)}
+.model-toggle:last-child{border-bottom:none}
+.model-toggle label{margin:0;font-size:12px;color:var(--t1);text-transform:none;letter-spacing:0;font-weight:400;flex:1}
+.model-toggle .model-cost{font-size:11px;color:var(--t3);width:80px;text-align:right}
+.toggle-sw{position:relative;width:36px;height:20px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0}
+.toggle-sw .slider{position:absolute;inset:0;background:var(--s3);border-radius:10px;cursor:pointer;transition:.2s}
+.toggle-sw .slider::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--t3);border-radius:50%;transition:.2s}
+.toggle-sw input:checked+.slider{background:var(--free)}
+.toggle-sw input:checked+.slider::before{transform:translateX(16px);background:#fff}
+@media(max-width:640px){.row,.row3{grid-template-columns:1fr}body{padding:10px}}
+</style>
+</head>
+<body>
+
+<h1>PROMPTER WIDEO</h1>
+<p class="sub">GenHQ &mdash; 4 Filary | 5 Warstw | Burger Formula | JSON | Rekomendacje modeli</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="sw('t2i')">T2I Klatka</div>
+  <div class="tab" onclick="sw('i2v')">I2V Director</div>
+  <div class="tab" onclick="sw('t2v')">T2V Wideo</div>
+  <div class="tab" onclick="sw('campaign')">Kampania</div>
+  <div class="tab" onclick="sw('json')">JSON</div>
+  <div class="tab" onclick="sw('analyze')">Analiza klatki</div>
+  <div class="tab" onclick="sw('config')">Ustawienia</div>
+  <div class="tab" onclick="sw('hist')">Historia</div>
+</div>
+
+<!-- ===================== CONFIG ===================== -->
+<div id="p-config" class="panel">
+<div class="card">
+  <h2>Ustawienia &mdash; Modele Unlimited / Free</h2>
+  <div class="info">Zaznacz modele, ktore sa aktualnie <strong>unlimited / free</strong> na Higgsfield. Rekomendacje beda je preferowac. Aktualizuj gdy zmieni sie oferta.</div>
+  <div id="config-models"></div>
+  <h3 style="margin-top:18px">Narzedzia zewnetrzne</h3>
+  <div class="info">Polecane gdy Higgsfield nie pokrywa danego zastosowania (np. lip-sync na gotowe audio, teledysk).</div>
+  <div style="font-size:12px;color:var(--t2);margin-top:8px;line-height:2">
+    <strong style="color:var(--y)">Wideo pod audio:</strong> Freebeat (choreografia pod beat + lip-sync)<br>
+    <strong style="color:var(--y)">Lip-sync:</strong> Sync.so (API) | Vozo AI (wiele osob) | Pika (krotkie klipy) | LipDub AI<br>
+    <strong style="color:var(--y)">Wizualizer muzyczny:</strong> Neural Frames (reaktywnosc na poszczegolne sciezki audio)<br>
+    <strong style="color:var(--y)">Generowanie dzwieku:</strong> ElevenLabs (glos + efekty) | Udio / Suno (muzyka)
+  </div>
+</div>
+</div>
+
+<!-- ===================== ANALYZE ===================== -->
+<div id="p-analyze" class="panel">
+<div class="card">
+  <h2>Analiza klatki &mdash; Wrzuc obraz, dostaniesz prompt</h2>
+  <div class="info">Wrzuc <strong>pierwsza klatke</strong> (i opcjonalnie <strong>ostatnia</strong>). Opisz co widzisz — narzedzie stworzy prompt wideo spolny z klatkami.</div>
+
+  <h3>Pierwsza klatka (Start Frame)</h3>
+  <div class="drop-zone" id="az-drop1">
+    Przeciagnij obraz lub kliknij, zeby wybrac plik
+    <input type="file" accept="image/*" onchange="loadImg(this,'az-preview1')">
+    <img id="az-preview1" style="display:none">
+  </div>
+  <label>Opisz dokladnie co widzisz na tej klatce</label>
+  <textarea id="az-desc1" rows="3" placeholder="Np. mloda kobieta w czerwonej sukience stoi na dachu wiezowca, wlosy rozwiewa wiatr, za nia panorama miasta o zachodzie slonca, cieple pomaranczowe swiatlo, ujecie od pasa w gore, patrzy w strone kamery z lekkim usmiechem"></textarea>
+
+  <div class="chk">
+    <input type="checkbox" id="az-use-end" onchange="document.getElementById('az-end-section').style.display=this.checked?'block':'none'">
+    <label for="az-use-end">Mam tez ostatnia klatke (End Frame)</label>
+  </div>
+
+  <div id="az-end-section" style="display:none">
+    <h3>Ostatnia klatka (End Frame)</h3>
+    <div class="drop-zone" id="az-drop2">
+      Przeciagnij obraz lub kliknij, zeby wybrac plik
+      <input type="file" accept="image/*" onchange="loadImg(this,'az-preview2')">
+      <img id="az-preview2" style="display:none">
+    </div>
+    <label>Opisz co widzisz na ostatniej klatce (skup sie na roznicach)</label>
+    <textarea id="az-desc2" rows="3" placeholder="Np. ta sama kobieta odwraca sie tylem, idzie w strone krawedzi dachu, wlosy powiewaja mocniej, slonce jest nizej, bardziej zlociste swiatlo, ujecie calej postaci, widzimy ja od tylu"></textarea>
+  </div>
+
+  <hr style="border:none;border-top:1px solid var(--brd);margin:16px 0">
+  <h3>Parametry wideo</h3>
+  <div class="row3">
+    <div><label>Czas trwania (sekundy)</label><input type="number" id="az-dur" value="5" min="3" max="15"></div>
+    <div><label>Nastroj / styl</label><input type="text" id="az-mood" placeholder="Np. kinowy, marzycielski, dramatyczny"></div>
+    <div><label>Ruch kamery</label><select id="az-cam">
+      <option value="">-- automatycznie --</option>
+      <option value="static locked-off with subtle zoom">statyczna kamera</option>
+      <option value="slow push-in">powolny najazd na obiekt</option>
+      <option value="gentle pull-out">powolny odjazd od obiektu</option>
+      <option value="slow pan left to right">powolna panorama w bok</option>
+      <option value="tracking shot following subject">kamera podaza za postacia</option>
+      <option value="slow orbit around subject">okrazanie postaci</option>
+      <option value="crane shot rising to bird eye view">dzwig w gore az do lotu ptaka</option>
+      <option value="handheld organic subtle movement">lekko niestabilna, z reki</option>
+    </select></div>
+  </div>
+
+  <div class="chk">
+    <input type="checkbox" id="az-has-audio" onchange="document.getElementById('az-audio-info').style.display=this.checked?'block':'none'">
+    <label for="az-has-audio">Mam gotowe audio / voiceover (wideo robione pod dzwiek)</label>
+  </div>
+  <div id="az-audio-info" style="display:none;margin-top:8px">
+    <div class="info"><strong>Tryb audio-driven:</strong> Prompt opisze ruch zsynchronizowany z rytmem/dialogiem. Uzyj Seedance (lip-sync) lub narzedzi zewnetrznych.</div>
+    <label>Opisz co slychac na audio</label>
+    <textarea id="az-audio-desc" rows="2" placeholder="Np. spokojna narracja mowiaca o produkcie, w tle lekka muzyka ambientowa, po 3 sekundach zmiana tempa na energiczne"></textarea>
+  </div>
+
+  <div class="btns">
+    <button class="btn btn-y" onclick="genAnalyze()">Generuj prompt z analizy</button>
+    <button class="btn btn-g" onclick="clearPanel('analyze')">Wyczysc</button>
+  </div>
+</div>
+<div class="card">
+  <div class="out-label">Prompt wideo z analizy klatek (EN)</div>
+  <div class="out-box" id="az-out">Wrzuc klatke, opisz ja i kliknij "Generuj prompt z analizy"</div>
+  <div id="az-rec"></div>
+  <div class="btns">
+    <button class="btn btn-b" onclick="cp('az-out')">Kopiuj prompt</button>
+    <button class="btn btn-g" onclick="saveHist('Analyze')">Zapisz w historii</button>
+  </div>
+</div>
+</div>
+
+<!-- ===================== T2I ===================== -->
+<div id="p-t2i" class="panel active">
+<div class="card">
+  <h2>Text-to-Image &mdash; Generowanie klatki (Start / End Frame)</h2>
+  <div class="info">Klatka definiuje 70-80% wizualu w I2V. Im lepsza klatka, tym mniej pracy przy prompcie wideo.</div>
+
+  <label>Typ klatki</label>
+  <div class="row">
+    <select id="t-type">
+      <option value="start">Pierwsza klatka (Start Frame)</option>
+      <option value="end">Ostatnia klatka (End Frame)</option>
+      <option value="both">Obie klatki (Start + End)</option>
+    </select>
+    <select id="t-purpose">
+      <option value="">-- Cel ujecia --</option>
+      <option value="hero">Glowne ujecie produktu / bohatera</option>
+      <option value="portrait">Portret / twarz</option>
+      <option value="landscape">Krajobraz / szerokie ujecie</option>
+      <option value="action">Scena akcji / ruchu</option>
+      <option value="commercial">Reklama / spot</option>
+      <option value="ugc">Social media / UGC</option>
+    </select>
+  </div>
+
+  <label>Glowny obiekt / postac</label>
+  <input type="text" id="t-subject" placeholder="Np. mloda kobieta z rudymi wlosami, biala jedwabna bluzka, zlote kolczyki">
+  <label>Akcja / poza (pierwsza klatka)</label>
+  <input type="text" id="t-action" placeholder="Np. stoi z zalozonymi rekami, patrzy prosto w kamere z pewnym siebie wyrazem twarzy">
+  <div id="t-end-wrap" style="display:none">
+    <label>Akcja / poza (ostatnia klatka)</label>
+    <input type="text" id="t-action-end" placeholder="Np. odchodzi tylem, wlosy powiewaja, oglada sie przez ramie w strone kamery">
+  </div>
+  <label>Tlo / miejsce</label>
+  <input type="text" id="t-bg" placeholder="Np. nowoczesny loft z ogromnymi oknami od podlogi do sufitu, widok na miasto o zlotej godzinie">
+
+  <!-- PILLAR 1 -->
+  <h3><span class="pillar">FILAR 1</span> Typ kamery &mdash; jaka faktura obrazu</h3>
+  <div class="tags" id="t-body-tags">
+    <span class="tag" data-v="shot on Red V-Raptor, clean high-contrast filmic look">Red V-Raptor — czysty, kontrastowy, kinowy obraz</span>
+    <span class="tag" data-v="shot on ARRI Alexa 35, industry-standard filmic quality">ARRI Alexa 35 — standard branzy filmowej</span>
+    <span class="tag" data-v="shot on Sony Venice, natural skin tones and rich shadow detail">Sony Venice — naturalne kolory skory, bogate cienie</span>
+    <span class="tag" data-v="shot on IMAX Film Camera, massive scale and deep detail">IMAX Film — ogromna skala i niesamowity detal</span>
+    <span class="tag" data-v="shot on Arriflex 16SR, documentary feel with heavy grain and nostalgic colors">Arriflex 16SR — ziarnisty, dokumentalny, nostalgiczny</span>
+  </div>
+
+  <!-- PILLAR 2 -->
+  <h3><span class="pillar">FILAR 2</span> Obiektyw &mdash; charakter obrazu</h3>
+  <div class="tag-group">
+    <div class="tag-group-title">Standardowe (ostre, czyste)</div>
+    <div class="tags" id="t-lens-tags">
+      <span class="tag" data-v="ARRI Signature Prime lens, modern natural rendering">ARRI Signature — nowoczesny, naturalny obraz</span>
+      <span class="tag" data-v="Zeiss Ultra Prime lens, sharp clinical look">Zeiss Ultra Prime — bardzo ostry, kliniczny</span>
+      <span class="tag" data-v="Petzval lens, vintage swirly bokeh">Petzval — starodawny, krecace sie rozmycie tla</span>
+      <span class="tag" data-v="Helios lens, swirly bokeh vintage character">Helios — vintage, wirujacy bokeh w tle</span>
+      <span class="tag" data-v="Laowa Macro lens, extreme close-up detail">Laowa Macro — do ekstremalnych zblizen (owady, tekstury)</span>
+    </div>
+  </div>
+  <div class="tag-group">
+    <div class="tag-group-title">Anamorficzne (kinowy szerokoekranowy efekt)</div>
+    <div class="tags" id="t-ana-tags">
+      <span class="tag" data-v="Panavision C-Series anamorphic lens, horizontal blue flares and oval bokeh, Hollywood look">Panavision C-Series — hollywoodzkie flary, owalne rozmycie</span>
+      <span class="tag" data-v="JDC Xtal Xpress anamorphic lens, blue flares, oval bokeh">JDC Xtal Xpress — niebieskie flary, filmowy look</span>
+    </div>
+  </div>
+
+  <!-- PILLAR 3 -->
+  <h3><span class="pillar">FILAR 3</span> Ogniskowa &mdash; jak szerokie jest ujecie</h3>
+  <div class="tags" id="t-focal-tags">
+    <span class="tag" data-v="8mm fisheye, extreme distortion curved edges">8mm Rybie oko — wszystko zaokraglone, ekstremalnie szerokie, efekt GoPro</span>
+    <span class="tag" data-v="14mm ultra-wide angle, making spaces look huge, architectural perspective">14mm Ultra-szerokie — pomieszczenia wygladaja ogromne, architektura</span>
+    <span class="tag" data-v="24mm wide angle, standard establishing shot perspective">24mm Szerokie — klasyczne ujecie pokazujace cale miejsce</span>
+    <span class="tag" data-v="35mm focal length, natural cinematic perspective">35mm Kinowe — naturalna perspektywa, jak w filmach</span>
+    <span class="tag" data-v="50mm focal length, mimics human eye, natural portrait">50mm Ludzkie oko — tak widzi czlowiek, naturalny portret</span>
+    <span class="tag" data-v="85mm focal length, classic portrait compression, beautiful bokeh">85mm Portretowe — twarz wyglada pieknie, ladne rozmycie tla</span>
+    <span class="tag" data-v="135mm telephoto, compressed background, intimate feel">135mm Teleobiektyw — tlo jest blisko, intymne ujecie, wszystko skomprymowane</span>
+    <span class="tag" data-v="200mm telephoto extreme compression, voyeuristic distant look">200mm Daleki podglad — silna kompresja, obserwacja z daleka</span>
+  </div>
+
+  <!-- PILLAR 4 -->
+  <h3><span class="pillar">FILAR 4</span> Przeslona &mdash; co jest ostre a co rozmyte</h3>
+  <div class="tags" id="t-aper-tags">
+    <span class="tag" data-v="f/1.2 wide open, razor-thin focus, dreamlike creamy background">f/1.2 — tylko oczy ostre, reszta w maslanych rozmyciu, marzycielski efekt</span>
+    <span class="tag" data-v="f/1.4 shallow depth of field, creamy bokeh">f/1.4 — twarz ostra, tlo pieknie rozmyte (klasyczny portret)</span>
+    <span class="tag" data-v="f/2.8 cinematic standard, subject separated but context preserved">f/2.8 — osoba wyraznie oddzielona od tla, ale tlo czytelne (standard filmowy)</span>
+    <span class="tag" data-v="f/4 balanced sharpness and separation">f/4 — dobry balans, wiekszosc kadru ostra, lekkie rozmycie tla</span>
+    <span class="tag" data-v="f/8 moderate deep focus, most of frame sharp">f/8 — prawie wszystko ostre, dobre do krajobrazow</span>
+    <span class="tag" data-v="f/11 deep focus, everything from foreground to horizon sharp">f/11 — wszystko ostre od blizu do horyzontu</span>
+    <span class="tag" data-v="f/16 maximum depth of field, everything razor sharp">f/16 — absolutnie wszystko ostre, makymalna glebia</span>
+  </div>
+
+  <h3>Oswietlenie</h3>
+  <div class="tags" id="t-light-tags">
+    <span class="tag" data-v="soft natural light">miekkie naturalne swiatlo</span>
+    <span class="tag" data-v="golden hour warm sunlight">zlota godzina (cieple slonce)</span>
+    <span class="tag" data-v="dramatic rim lighting with deep shadows">swiatlo konturowe (osoba swieci od tylu)</span>
+    <span class="tag" data-v="studio three-point lighting, clean professional">studyjne 3-punktowe (profesjonalne)</span>
+    <span class="tag" data-v="neon glow, colorful ambient lighting">neonowy blask (kolorowe, miejskie)</span>
+    <span class="tag" data-v="overcast diffused soft light">pochmurne rozproszone (brak cieni)</span>
+    <span class="tag" data-v="backlit silhouette with glowing edges">podswietlenie od tylu (sylwetka)</span>
+    <span class="tag" data-v="high-key bright even lighting, commercial feel">jasne rowne (reklamowe)</span>
+    <span class="tag" data-v="low-key moody dramatic deep shadows">ciemne nastrojowe (dramatyczne cienie)</span>
+    <span class="tag" data-v="candlelight warm intimate glow">swiatlo swiec (cieple, intymne)</span>
+    <span class="tag" data-v="moonlight cold blue tones">ksiezycowe (zimne niebieskie)</span>
+  </div>
+
+  <h3>Typ ujecia (jak blisko kamery)</h3>
+  <div class="tags" id="t-shot-tags">
+    <span class="tag" data-v="extreme close-up">Ekstremalny detal (np. same oczy)</span>
+    <span class="tag" data-v="close-up portrait">Zbliżenie (twarz)</span>
+    <span class="tag" data-v="medium close-up">Sredni zbliżenie (glowa + ramiona)</span>
+    <span class="tag" data-v="medium shot, waist up">Sredni plan (od pasa w gore)</span>
+    <span class="tag" data-v="full body shot">Cala postac</span>
+    <span class="tag" data-v="wide establishing shot">Szeroki plan (cale miejsce)</span>
+    <span class="tag" data-v="low angle hero shot, looking up">Z dolu w gore (postac wyglada potężnie)</span>
+    <span class="tag" data-v="high angle shot, looking down">Z gory w dol (postac wyglada mala)</span>
+    <span class="tag" data-v="bird's eye view, directly overhead">Z lotu ptaka (prosto z gory)</span>
+    <span class="tag" data-v="over the shoulder shot">Zza ramienia (widok drugiej osoby)</span>
+    <span class="tag" data-v="dutch angle, tilted frame">Przekrzywiony kadr (niepokojacy efekt)</span>
+  </div>
+
+  <label>Dodatkowe detale</label>
+  <textarea id="t-extra" rows="2" placeholder="Np. ziarno filmowe, flary obiektywu, mgla, kolorystyka niebiesko-pomaranczowa"></textarea>
+
+  <div class="btns">
+    <button class="btn btn-y" onclick="genFrame()">Generuj prompt klatki</button>
+    <button class="btn btn-g" onclick="clearPanel('t2i')">Wyczysc</button>
+  </div>
+</div>
+<div class="card">
+  <div class="out-label">Prompt klatki (EN)</div>
+  <div class="out-box" id="t-out">Uzupelnij pola i kliknij "Generuj prompt klatki"</div>
+  <div class="btns">
+    <button class="btn btn-b" onclick="cp('t-out')">Kopiuj</button>
+    <button class="btn btn-g" onclick="saveHist('T2I')">Zapisz w historii</button>
+  </div>
+</div>
+</div>
+
+<!-- ===================== I2V ===================== -->
+<div id="p-i2v" class="panel">
+<div class="card">
+  <h2>Image-to-Video (I2V) &mdash; Director Mode</h2>
+  <div class="info"><strong>Burger Formula:</strong> [akcja] + [zmiany obiektu/otoczenia] + [ruch kamery] + [zmiany nastroju/swiatla] + [techniczne]<br>Obraz = 70-80% wizualu. Nie opisuj tego co juz widac. Skup sie na RUCHU i ZMIANACH.</div>
+
+  <h3>Typ sceny (do rekomendacji modelu)</h3>
+  <div class="tags" id="i-scene-tags">
+    <span class="tag" data-v="portrait_talking">Portret / mowiaca glowa</span>
+    <span class="tag" data-v="product_reveal">Odkrycie produktu</span>
+    <span class="tag" data-v="action_dynamic">Dynamiczna akcja</span>
+    <span class="tag" data-v="landscape_nature">Krajobraz / natura</span>
+    <span class="tag" data-v="commercial_ad">Reklama / spot</span>
+    <span class="tag" data-v="abstract_artistic">Abstrakcja / sztuka</span>
+    <span class="tag" data-v="vfx_explosion">Efekty specjalne / eksplozje</span>
+    <span class="tag" data-v="lipsync_dialogue">Lip-sync / ruszajace usta</span>
+    <span class="tag" data-v="music_video">Teledysk / klip muzyczny</span>
+    <span class="tag" data-v="timelapse">Przyspieszone uplyw czasu</span>
+  </div>
+
+  <div class="chk">
+    <input type="checkbox" id="i-has-audio" onchange="document.getElementById('i-audio-section').style.display=this.checked?'block':'none'">
+    <label for="i-has-audio">Mam gotowe audio (wideo robione pod dzwiek)</label>
+  </div>
+  <div id="i-audio-section" style="display:none">
+    <label>Opisz co slychac na audio</label>
+    <textarea id="i-audio-desc" rows="2" placeholder="Np. energiczna muzyka elektroniczna, mocny bass drop w 3 sekundzie, narracja mowiaca 'odkryj nowy wymiar'"></textarea>
+  </div>
+
+  <div id="i-rec" class="rec-box" style="display:none"></div>
+  <div class="btns" style="margin-top:8px">
+    <button class="btn btn-b btn-sm" onclick="showRec('i2v')">Pokaz rekomendacje modelu</button>
+  </div>
+
+  <label>Model (lub wybierz z rekomendacji powyzej)</label>
+  <select id="i-model">
+    <option value="Kling 3.0">Kling 3.0 (fotorealizm, fizyka, 3-15s)</option>
+    <option value="Kling o1">Kling o1 (rozumowanie, zlożone sceny)</option>
+    <option value="Kling 2.6">Kling 2.6 (szybki, stabilna animacja)</option>
+    <option value="Sora 2">Sora 2 (symulacja swiata, 5-20s)</option>
+    <option value="Veo 3.1">Veo 3.1 (4K, kinowe przeplyw)</option>
+    <option value="Wan 2.5">Wan 2.5 (szybki, zbalansowany)</option>
+    <option value="MiniMax Hailuo">MiniMax Hailuo (presety, szybki)</option>
+    <option value="Seedance 1.5 Pro">Seedance 1.5 Pro (audio + lip-sync)</option>
+  </select>
+
+  <div class="row3">
+    <div><label>Format</label><select id="i-ratio">
+      <option value="16:9">16:9 Poziomy</option><option value="9:16">9:16 Pionowy (TikTok)</option>
+      <option value="1:1">1:1 Kwadrat</option><option value="21:9">21:9 Ultra-szeroki (kino)</option>
+    </select></div>
+    <div><label>Czas (sekundy)</label><input type="number" id="i-dur" value="5" min="3" max="20"></div>
+    <div><label>Jakosc</label><select id="i-qual">
+      <option value="1080p">1080p Full HD</option><option value="720p">720p HD</option><option value="4K">4K Ultra HD</option>
+    </select></div>
+  </div>
+
+  <h3>1. Akcja / sekwencja ruchow</h3>
+  <textarea id="i-action" rows="2" placeholder="Np. postac powoli podnosi miecz i wykonuje ciecie, delikatny usmiech przechodzi w machnięcie reka, dlonia unosi produkt w strone kamery"></textarea>
+
+  <h3>2. Zmiany obiektu / otoczenia</h3>
+  <textarea id="i-shifts" rows="2" placeholder="Np. wyraz twarzy zmienia sie z powaznego na radosny, wlosy zaczynaja powiewac na wietrze, tlo przechodzi z dnia w zmierzch"></textarea>
+
+  <h3>3. Ruch kamery</h3>
+  <div class="tag-group">
+    <div class="tag-group-title">Proste ruchy (lagodne, kontrolowane)</div>
+    <div class="tags" id="i-cam-tags">
+      <span class="tag" data-v="static locked-off camera with subtle zoom">Statyczna kamera — nieruchoma, ewentualnie delikatny zoom</span>
+      <span class="tag" data-v="slow smooth push-in toward subject">Powolny najazd — kamera zbliża sie do obiektu</span>
+      <span class="tag" data-v="gentle pull-out revealing wider scene">Powolny odjazd — kamera oddala sie pokazujac wiecej</span>
+      <span class="tag" data-v="slow pan left to right">Panorama w prawo — kamera obraca sie w bok</span>
+      <span class="tag" data-v="slow pan right to left">Panorama w lewo — kamera obraca sie w drugi bok</span>
+      <span class="tag" data-v="tilt up from ground to sky">Tilt w gore — od ziemi ku niebu</span>
+      <span class="tag" data-v="tilt down from sky to ground">Tilt w dol — od nieba ku ziemi</span>
+      <span class="tag" data-v="lateral tracking slide left to right">Jazda boczna — kamera jedzie rownoleglo do obiektu</span>
+      <span class="tag" data-v="dolly forward smooth ground-level movement">Dolly do przodu — kamera jedzie na torach do przodu</span>
+      <span class="tag" data-v="dolly backward pulling away from subject">Dolly do tylu — kamera cofa sie na torach</span>
+    </div>
+  </div>
+
+  <div class="tag-group">
+    <div class="tag-group-title">Sledzenie i okrazanie</div>
+    <div class="tags" id="i-cam-follow-tags">
+      <span class="tag" data-v="tracking shot following subject from behind">Sledzenie od tylu — kamera podaza za idaca postacia</span>
+      <span class="tag" data-v="tracking shot walking alongside subject">Sledzenie z boku — kamera idzie obok postaci</span>
+      <span class="tag" data-v="steadicam smooth follow through environment">Steadicam — plynne sledzenie przez przestrzen (jak w filmie)</span>
+      <span class="tag" data-v="slow orbit 360 degrees around subject">Orbita 360° — kamera okraza obiekt dookola</span>
+      <span class="tag" data-v="half orbit 180 degrees around subject">Polorbita 180° — kamera okraza do polowy</span>
+      <span class="tag" data-v="arc shot curving around subject">Luk — kamera jedzie po luku wokol postaci</span>
+    </div>
+  </div>
+
+  <div class="tag-group">
+    <div class="tag-group-title">Ruch w pionie (dzwig, dron)</div>
+    <div class="tags" id="i-cam-vert-tags">
+      <span class="tag" data-v="crane shot rising upward from ground level to bird's eye view">Dzwig w gore — od poziomu ziemi az do widoku z lotu ptaka</span>
+      <span class="tag" data-v="crane shot descending from above to ground level">Dzwig w dol — od gory opadamy do poziomu postaci</span>
+      <span class="tag" data-v="jib shot smooth vertical sweep">Jib — plynne piecie w gore (mniejszy zakres niz dzwig)</span>
+      <span class="tag" data-v="drone aerial shot rising and pulling back">Dron wznoszacy sie — kamera leci w gore i do tylu</span>
+      <span class="tag" data-v="drone descending dive toward subject">Dron nurkujacy — kamera spada z gory na obiekt</span>
+      <span class="tag" data-v="drone flyover passing above subject and landscape">Dron przelot — kamera przelatuje nad obiektem i krajobrazem</span>
+      <span class="tag" data-v="elevator shot straight vertical rise">Winda — kamera jedzie prosto w gore (jak w windzie)</span>
+    </div>
+  </div>
+
+  <div class="tag-group">
+    <div class="tag-group-title">Zaawansowane efekty kamerowe</div>
+    <div class="tags" id="i-cam2-tags">
+      <span class="tag" data-v="FPV drone fly-through, high speed aggressive flight, banking turns, diving, proximity flying">FPV Dron — szybki przelot jak odrzutowiec, ostre zakrety, nurkowanie miedzy obiektami</span>
+      <span class="tag" data-v="barrel roll, 360 camera roll, spinning horizon, vortex shot">Beczkowy obrot — kamera obraca sie wokol wlasnej osi, horyzont sie kreci</span>
+      <span class="tag" data-v="dolly zoom, Vertigo Effect, Hitchcock Zoom, subject same size but background warps and stretches">Dolly Zoom (Vertigo) — postac stoi w miejscu ale tlo sie rozciaga/kurczy (efekt z Hitchcocka)</span>
+      <span class="tag" data-v="crash zoom, snap zoom, extremely fast zoom in onto face or detail">Crash Zoom — blyskawiczy zoom na twarz lub detal (efekt szoku/zaskoczenia)</span>
+      <span class="tag" data-v="crash zoom out, rapid zoom out revealing entire scene">Crash Zoom Out — blyskawiczy odjazd ujawniajacy cala scene</span>
+      <span class="tag" data-v="whip pan, extremely fast horizontal camera turn with motion blur">Whip Pan — blyskawiczy obrot kamery w bok (z rozmyciem ruchu)</span>
+      <span class="tag" data-v="whip tilt, extremely fast vertical camera movement">Whip Tilt — blyskawiczy ruch kamery gora-dol</span>
+      <span class="tag" data-v="God's eye view, top-down 90-degree overhead, looking straight down">Widok z gory (God's Eye) — kamera patrzy prosto w dol jak na mape</span>
+      <span class="tag" data-v="bullet time, frozen time, camera orbits around completely frozen subject">Bullet Time (Matrix) — czas zatrzymany, kamera lata wokol zamrozone postaci</span>
+    </div>
+  </div>
+
+  <div class="tag-group">
+    <div class="tag-group-title">Przejscia i efekty specjalne</div>
+    <div class="tags" id="i-cam3-tags">
+      <span class="tag" data-v="camera pushes through glass window transitioning to other side">Przejscie przez szybe — kamera przenika przez okno/szyba na druga strone</span>
+      <span class="tag" data-v="camera passes through wall into next room">Przejscie przez sciane — kamera wchodzi przez sciane do drugiego pomieszczenia</span>
+      <span class="tag" data-v="camera dives into mirror revealing alternate reality">Wejscie w lustro — kamera wpada w lustro i jest juz inny swiat</span>
+      <span class="tag" data-v="camera flies through keyhole into room">Przez dziurke od klucza — kamera wlatuje przez maly otwor do srodka</span>
+      <span class="tag" data-v="camera zooms into eye and enters a new world inside">Zoom w oko — kamera wchodzi w zrenice postaci i wchodzi do nowego swiata</span>
+      <span class="tag" data-v="camera emerges from underwater breaking water surface">Wyjscie z wody — kamera wynurza sie przebijajac tafle wody</span>
+      <span class="tag" data-v="camera dives into water from above surface">Nurkowanie w wode — kamera wpada pod wode z powietrza</span>
+      <span class="tag" data-v="camera flies through portal into different dimension">Przez portal — kamera przelatuje przez portal do innego wymiaru</span>
+      <span class="tag" data-v="match cut transition, scene morphs seamlessly into completely different scene">Match Cut — scena plynnie przechodzi w zupelnie inna scene (np. pilka→planeta)</span>
+      <span class="tag" data-v="speed ramp, camera movement accelerates then suddenly slows to slow motion">Rampa predkosci — ruch przyspiesza i nagle zwalnia do slow motion</span>
+      <span class="tag" data-v="infinite zoom, continuous zooming through fractal-like layers of detail">Nieskonczone zblizanie — ciagle zblizanie sie przez kolejne warstwy detali</span>
+      <span class="tag" data-v="reverse motion, everything plays backwards while camera moves forward">Cofanie czasu — wszystko leci do tylu, kamera jedzie do przodu</span>
+    </div>
+  </div>
+
+  <div class="tag-group">
+    <div class="tag-group-title">Styl ruchu kamery</div>
+    <div class="tags" id="i-cam-style-tags">
+      <span class="tag" data-v="handheld documentary style with subtle organic shake">Z reki (dokumentalny) — lekkie drzenie, autentyczny feel</span>
+      <span class="tag" data-v="smooth gimbal stabilized cinematic movement">Stabilizator gimbal — mega plynne ruchy jak w filmie</span>
+      <span class="tag" data-v="shaky camera intense action feel">Trzesaca sie kamera — intensywna, jak w scenach akcji</span>
+      <span class="tag" data-v="robotic precise mechanical camera movement">Robotyczna precyzja — mechaniczne, idealne ruchy</span>
+      <span class="tag" data-v="dreamy floating weightless camera movement">Plywajaca marzycielska — kamera leniwie unosi sie w powietrzu</span>
+      <span class="tag" data-v="hyperlapse accelerated time-lapse camera movement through space">Hyperlapse — przyspieszone przesuwanie kamery przez przestrzen</span>
+    </div>
+  </div>
+
+  <h3>4. Zmiany nastroju / swiatla</h3>
+  <div class="tags" id="i-mood-tags">
+    <span class="tag" data-v="transitions from warm daylight to cool twilight">Dzien przechodzi w zmierzch</span>
+    <span class="tag" data-v="dramatic rim lighting gradually intensifies">Swiatlo konturowe powoli narasta</span>
+    <span class="tag" data-v="cinematic dramatic atmosphere builds tension">Kinowy dramatyzm narasta</span>
+    <span class="tag" data-v="soft dreamy ethereal glow appears">Marzycielska poswiatla wchodzi</span>
+    <span class="tag" data-v="neon lights pulse and shift colors rhythmically">Neony pulsuja i zmieniaja kolory</span>
+    <span class="tag" data-v="shadows deepen creating growing mystery">Cienie narastaja, robi sie tajemniczo</span>
+    <span class="tag" data-v="lighting shifts from cool blue to warm golden">Swiatlo zmienia sie z zimnego na cieple</span>
+    <span class="tag" data-v="explosion of bright light, lens flare burst">Eksplozja swiatla, rozblysk soczewki</span>
+    <span class="tag" data-v="scene gradually darkens to near black">Scena powoli ciemnieje az do czerni</span>
+    <span class="tag" data-v="fog or mist rolls in gradually">Mgla powoli wchodzi w scene</span>
+  </div>
+
+  <h3>5. Techniczne</h3>
+  <textarea id="i-tech" rows="2" placeholder="Np. naturalny ruch bez znieksztalcen, plytka glebia ostrosci, filmowa kolorystyka, flara obiektywu anamorficznego"></textarea>
+  <label>Negatywny prompt (czego unikac)</label>
+  <input type="text" id="i-neg" placeholder="Np. rozmyte, trzesace sie, znieksztalcone twarze, napisy, znak wodny">
+
+  <div class="btns">
+    <button class="btn btn-y" onclick="genI2V()">Generuj prompt I2V</button>
+    <button class="btn btn-g" onclick="clearPanel('i2v')">Wyczysc</button>
+  </div>
+</div>
+<div class="card">
+  <div class="out-label">Prompt I2V (EN)</div>
+  <div class="out-box" id="i-out">Uzupelnij pola i kliknij "Generuj prompt I2V"</div>
+  <div class="btns">
+    <button class="btn btn-b" onclick="cp('i-out')">Kopiuj</button>
+    <button class="btn btn-g" onclick="saveHist('I2V')">Zapisz w historii</button>
+  </div>
+</div>
+</div>
+
+<!-- ===================== T2V ===================== -->
+<div id="p-t2v" class="panel">
+<div class="card">
+  <h2>Text-to-Video &mdash; 5 Warstw</h2>
+  <div class="info"><strong>5 warstw:</strong> Scena → Postacie → Akcja → Kamera → Dzwiek i styl</div>
+
+  <h3>Typ sceny (do rekomendacji modelu)</h3>
+  <div class="tags" id="v-scene-tags">
+    <span class="tag" data-v="portrait_talking">Portret / mowiaca glowa</span>
+    <span class="tag" data-v="product_reveal">Odkrycie produktu</span>
+    <span class="tag" data-v="action_dynamic">Dynamiczna akcja</span>
+    <span class="tag" data-v="landscape_nature">Krajobraz / natura</span>
+    <span class="tag" data-v="commercial_ad">Reklama</span>
+    <span class="tag" data-v="abstract_artistic">Abstrakcja</span>
+    <span class="tag" data-v="lipsync_dialogue">Lip-sync</span>
+    <span class="tag" data-v="music_video">Teledysk</span>
+  </div>
+
+  <div class="chk">
+    <input type="checkbox" id="v-has-audio" onchange="document.getElementById('v-audio-section').style.display=this.checked?'block':'none'">
+    <label for="v-has-audio">Mam gotowe audio (wideo pod dzwiek)</label>
+  </div>
+  <div id="v-audio-section" style="display:none">
+    <label>Opisz co slychac</label>
+    <textarea id="v-audio-desc" rows="2" placeholder="Np. spokojna narracja o produkcie, w tle delikatna muzyka ambientowa"></textarea>
+  </div>
+
+  <div id="v-rec" class="rec-box" style="display:none"></div>
+  <div class="btns" style="margin-top:8px">
+    <button class="btn btn-b btn-sm" onclick="showRec('t2v')">Pokaz rekomendacje modelu</button>
+  </div>
+
+  <label>Model</label>
+  <select id="v-model">
+    <option value="Kling 3.0">Kling 3.0</option><option value="Kling o1">Kling o1</option>
+    <option value="Kling 2.6">Kling 2.6</option><option value="Sora 2">Sora 2</option>
+    <option value="Veo 3.1">Veo 3.1</option><option value="Wan 2.5">Wan 2.5</option>
+    <option value="MiniMax Hailuo">MiniMax Hailuo</option>
+    <option value="Seedance 1.5 Pro">Seedance 1.5 Pro</option>
+  </select>
+
+  <div class="row3">
+    <div><label>Format</label><select id="v-ratio">
+      <option value="16:9">16:9 Poziomy</option><option value="9:16">9:16 Pionowy</option>
+      <option value="1:1">1:1 Kwadrat</option><option value="21:9">21:9 Kinowy</option>
+    </select></div>
+    <div><label>Czas (sekundy)</label><input type="number" id="v-dur" value="5" min="3" max="20"></div>
+    <div><label>Jakosc</label><select id="v-qual">
+      <option value="1080p">1080p</option><option value="720p">720p</option><option value="4K">4K</option>
+    </select></div>
+  </div>
+
+  <h3>W1 — Scena (gdzie sie to dzieje)</h3>
+  <textarea id="v-scene" rows="2" placeholder="Np. waski zaułek w Tokio noca podczas lekkiego deszczu, kaluze odbijaja kolorowe neony"></textarea>
+  <h3>W2 — Postacie (kto)</h3>
+  <textarea id="v-chars" rows="2" placeholder="Np. mloda Japonka w czarnej skorzanej kurtce i czerwonym szaliku, pewna siebie postawa"></textarea>
+  <h3>W3 — Akcja (co robi)</h3>
+  <textarea id="v-action" rows="2" placeholder="Np. idzie naprzod przez zaułek, zatrzymuje sie, odwraca glowe przez ramie, potem idzie dalej"></textarea>
+  <h3>W4 — Kamera (jak to filmujemy)</h3>
+  <div class="tags" id="v-cam-tags">
+    <span class="tag" data-v="static camera">Statyczna</span>
+    <span class="tag" data-v="slow push-in">Najazd</span>
+    <span class="tag" data-v="pull-out">Odjazd</span>
+    <span class="tag" data-v="pan left to right">Panorama</span>
+    <span class="tag" data-v="tracking shot following subject">Sledzenie postaci</span>
+    <span class="tag" data-v="orbit around subject">Okrazanie</span>
+    <span class="tag" data-v="crane shot rising to aerial view">Dzwig do gory</span>
+    <span class="tag" data-v="handheld organic">Z reki</span>
+    <span class="tag" data-v="FPV drone fly-through">FPV Dron</span>
+    <span class="tag" data-v="dolly zoom Vertigo Effect">Dolly Zoom (Vertigo)</span>
+    <span class="tag" data-v="crash zoom snap zoom">Crash Zoom (blyskawiczy)</span>
+    <span class="tag" data-v="bullet time frozen orbit">Bullet Time (czas stop)</span>
+    <span class="tag" data-v="drone aerial shot">Dron z gory</span>
+    <span class="tag" data-v="whip pan fast horizontal turn">Whip Pan (szybki obrot)</span>
+    <span class="tag" data-v="camera pushes through glass window">Przejscie przez szybe</span>
+    <span class="tag" data-v="speed ramp accelerating then slow motion">Rampa predkosci</span>
+    <span class="tag" data-v="steadicam smooth follow">Steadicam (plynne sledzenie)</span>
+  </div>
+  <h3>W5 — Dzwiek i styl</h3>
+  <div class="row">
+    <div><label>Styl wizualny</label><input type="text" id="v-style" placeholder="Np. kinowy, anamorficzny, filmowa kolorystyka"></div>
+    <div><label>Dzwiek / efekty</label><input type="text" id="v-audio" placeholder="Np. dzwiek deszczu, odlegly ruch uliczny, cicha muzyka"></div>
+  </div>
+  <label>Negatywny prompt</label>
+  <input type="text" id="v-neg" placeholder="Np. rozmyte, trzesace sie, znak wodny, napisy">
+
+  <div class="btns">
+    <button class="btn btn-y" onclick="genT2V()">Generuj prompt T2V</button>
+    <button class="btn btn-g" onclick="clearPanel('t2v')">Wyczysc</button>
+  </div>
+</div>
+<div class="card">
+  <div class="out-label">Prompt T2V (EN)</div>
+  <div class="out-box" id="v-out">Uzupelnij i kliknij "Generuj prompt T2V"</div>
+  <div class="btns">
+    <button class="btn btn-b" onclick="cp('v-out')">Kopiuj</button>
+    <button class="btn btn-g" onclick="saveHist('T2V')">Zapisz w historii</button>
+  </div>
+</div>
+</div>
+
+<!-- ===================== CAMPAIGN ===================== -->
+<div id="p-campaign" class="panel">
+<div class="card">
+  <h2>Kampania / UGC &mdash; Shot-by-Shot</h2>
+  <div class="info">Format produkcyjny: kazdy shot z <strong>Visual</strong>, <strong>Dialogue</strong> i <strong>SFX</strong>.</div>
+  <label>Nazwa kampanii</label>
+  <input type="text" id="c-name" placeholder="Np. Kampania startowa GenHQ">
+  <label>Typ</label>
+  <select id="c-type">
+    <option value="UGC CAMPAIGN">Kampania UGC</option>
+    <option value="COMMERCIAL">Reklama / spot</option>
+    <option value="BRAND VIDEO">Film marki</option>
+    <option value="PRODUCT LAUNCH">Premiera produktu</option>
+    <option value="SOCIAL MEDIA AD">Reklama social media</option>
+  </select>
+  <div class="row">
+    <div><label>Calkowity czas (sekundy)</label><input type="number" id="c-total" value="20" min="5" max="60"></div>
+    <div><label>Model</label><select id="c-model">
+      <option value="Kling 3.0">Kling 3.0</option><option value="Kling o1">Kling o1</option>
+      <option value="Sora 2">Sora 2</option><option value="Veo 3.1">Veo 3.1</option>
+      <option value="MiniMax Hailuo">MiniMax Hailuo</option>
+      <option value="Seedance 1.5 Pro">Seedance 1.5 Pro</option>
+    </select></div>
+  </div>
+  <label>Postac (jednolita we wszystkich shotach)</label>
+  <input type="text" id="c-char" placeholder="Np. pewna siebie mloda kobieta, ciemne wlosy, bluza z logo GenHQ">
+  <label>Glowny przekaz kampanii</label>
+  <textarea id="c-msg" rows="2" placeholder="Np. AI jest trudne do opanowania. Zeby nadazyc za kreatywnoscia, trzeba opanowac narzedzia. GenHQ uczy jak to robic."></textarea>
+  <div id="c-shots"></div>
+  <div class="btns">
+    <button class="btn btn-b" onclick="addShot()">+ Dodaj shot</button>
+    <button class="btn btn-y" onclick="genCampaign()">Generuj kampanie</button>
+    <button class="btn btn-g" onclick="clearPanel('campaign')">Wyczysc</button>
+  </div>
+</div>
+<div class="card">
+  <div class="out-label">Skrypt kampanii</div>
+  <div class="out-box" id="c-out">Dodaj shoty i kliknij "Generuj kampanie"</div>
+  <div class="btns">
+    <button class="btn btn-b" onclick="cp('c-out')">Kopiuj</button>
+    <button class="btn btn-g" onclick="saveHist('Campaign')">Zapisz</button>
+  </div>
+</div>
+</div>
+
+<!-- ===================== JSON ===================== -->
+<div id="p-json" class="panel">
+<div class="card">
+  <h2>JSON Prompt &mdash; Ustrukturyzowany obiekt</h2>
+  <div class="info"><strong>JSON Prompting</strong> = modularny format promptu. Lepsza precyzja i powtarzalnosc. Najlepiej z Kling 3.0, Veo 3.1, Sora 2.</div>
+  <label>Typ</label>
+  <select id="j-seqtype">
+    <option value="text_to_video">Tekst na wideo</option>
+    <option value="image_to_video">Obraz na wideo</option>
+  </select>
+  <div class="row3">
+    <div><label>Czas (sekundy)</label><input type="number" id="j-dur" value="10" min="3" max="20"></div>
+    <div><label>Perspektywa</label><select id="j-persp">
+      <option value="cinematic_third_person">Kinowa trzecia osoba</option>
+      <option value="first_person_pov">Pierwsza osoba (POV)</option>
+      <option value="embodied_flying_pov">Latajacy punkt widzenia</option>
+      <option value="top_down">Widok z gory</option>
+    </select></div>
+    <div><label>Obiektyw</label><select id="j-lens">
+      <option value="standard_50mm">50mm — naturalny jak ludzkie oko</option>
+      <option value="wide_24mm">24mm — szeroki, widac duzo</option>
+      <option value="ultra_wide_14mm">14mm — ultra-szeroki, ogromne przestrzenie</option>
+      <option value="telephoto_85mm">85mm — portretowy, ladne rozmycie</option>
+      <option value="anamorphic">Anamorficzny — kinowy szerokoekranowy</option>
+    </select></div>
+  </div>
+  <h3>Scena</h3>
+  <div class="row">
+    <div><label>Opis miejsca</label><input type="text" id="j-scene-desc" placeholder="Np. ruchliwa ulica w centrum miasta"></div>
+    <div><label>Pora dnia / pogoda</label><input type="text" id="j-scene-time" placeholder="Np. zachod slonca, zlota godzina"></div>
+  </div>
+  <h3>Kamera</h3>
+  <div class="row3">
+    <div><label>Ruch</label><input type="text" id="j-cam-motion" placeholder="Np. powolna panorama w lewo"></div>
+    <div><label>Typ ujecia</label><input type="text" id="j-cam-type" placeholder="Np. szerokie ujecie"></div>
+    <div><label>Stabilnosc</label><select id="j-cam-stab">
+      <option value="smooth_stabilized">Plynna stabilizowana</option>
+      <option value="handheld">Z reki</option>
+      <option value="controlled_instability">Kontrolowane drzenie</option>
+      <option value="static_tripod">Statyw (nieruchoma)</option>
+    </select></div>
+  </div>
+  <h3>Ruch w scenie</h3>
+  <label>Poczatek</label><input type="text" id="j-mov-start" placeholder="Np. kamera wchodzi w scene, sunac do przodu">
+  <label>Sciezka ruchu (kazdy krok w nowej linii)</label>
+  <textarea id="j-mov-path" rows="3" placeholder="Np. przelot nad blatem z kucharzami krojacymi warzywa&#10;minięcie patelni z syczeacym jedzeniem&#10;lagodny zakret wokol wiszacych garncow"></textarea>
+  <label>Koniec</label><input type="text" id="j-mov-end" placeholder="Np. dojazd do gotowego dania na talerzu, kamera lekko zwalnia">
+  <h3>Srodowisko</h3>
+  <div class="row">
+    <div><label>Opis swiata</label><input type="text" id="j-env-world" placeholder="Np. ciepla, aktywna profesjonalna kuchnia"></div>
+    <div><label>Materialy i tekstury</label><input type="text" id="j-env-mat" placeholder="Np. stal nierdzewna, ceramika, drewno, para"></div>
+  </div>
+  <div class="row">
+    <div><label>Oswietlenie</label><input type="text" id="j-env-light" placeholder="Np. cieple praktyczne swiatlo kuchenne"></div>
+    <div><label>Atmosfera</label><input type="text" id="j-env-atmo" placeholder="Np. lekka para, dym z gotowania, migotanie ciepla"></div>
+  </div>
+  <h3>Styl i dzwiek</h3>
+  <div class="row">
+    <div><label>Styl</label><input type="text" id="j-style" placeholder="Np. kinowy, filmowy"></div>
+    <div><label>Dzwieki</label><input type="text" id="j-audio" placeholder="Np. szum miasta, ruch samochodow, wiatr"></div>
+  </div>
+  <h3>Czego unikac (forbidden)</h3>
+  <input type="text" id="j-forbidden" placeholder="Np. eksplozje, napisy, znak wodny, drganie kamery">
+  <div class="btns">
+    <button class="btn btn-y" onclick="genJSON()">Generuj JSON</button>
+    <button class="btn btn-g" onclick="clearPanel('json')">Wyczysc</button>
+  </div>
+</div>
+<div class="card">
+  <div class="out-label">JSON Prompt</div>
+  <div class="out-box" id="j-out" style="font-size:12px">Uzupelnij i kliknij "Generuj JSON"</div>
+  <div class="btns">
+    <button class="btn btn-b" onclick="cp('j-out')">Kopiuj</button>
+    <button class="btn btn-g" onclick="saveHist('JSON')">Zapisz</button>
+  </div>
+</div>
+</div>
+
+<!-- ===================== HISTORY ===================== -->
+<div id="p-hist" class="panel">
+<div class="card">
+  <h2>Historia promptow</h2>
+  <div id="hist-list"><p style="color:var(--t3);font-size:12px">Brak zapisanych.</p></div>
+  <div class="btns">
+    <button class="btn btn-g" onclick="clearHist()">Wyczysc</button>
+    <button class="btn btn-b" onclick="exportHist()">Eksportuj</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ===== MODEL DATABASE =====
+const MODELS = {
+  'Kling 3.0':        {credits:7,strengths:['photorealism','physics','start_end_frame','audio','character_lock'],dur:'3-15s',res:'1080p'},
+  'Kling o1':         {credits:8,strengths:['complex_scenes','reasoning','multi_layer','long_prompts'],dur:'5-10s',res:'1080p'},
+  'Kling 2.6':        {credits:5,strengths:['fast','stable_animation','character_consistency','iteration'],dur:'5-10s',res:'1080p'},
+  'Sora 2':           {credits:10,strengths:['world_simulation','physics','object_permanence','long_duration'],dur:'5-20s',res:'1080p'},
+  'Veo 3.1':          {credits:8,strengths:['4k','cinematic_flow','crystal_clear','hero_shots'],dur:'5-8s',res:'4K'},
+  'Wan 2.5':          {credits:3,strengths:['fast','balanced','prototyping','iteration'],dur:'5-10s',res:'1080p'},
+  'MiniMax Hailuo':   {credits:0,strengths:['presets','click_to_video','no_prompt','fast','general'],dur:'5-10s',res:'1080p'},
+  'Seedance 1.5 Pro': {credits:4,strengths:['native_audio','lip_sync','sfx','music','dialogue'],dur:'5-10s',res:'1080p'},
+};
+
+let unlimitedModels = JSON.parse(localStorage.getItem('hf-unlimited')||'null') || {
+  'MiniMax Hailuo':true,'Seedance 1.5 Pro':true,'Wan 2.5':true,
+  'Kling 3.0':false,'Kling o1':false,'Kling 2.6':false,'Sora 2':false,'Veo 3.1':false
+};
+function saveUnlimited(){localStorage.setItem('hf-unlimited',JSON.stringify(unlimitedModels));}
+
+function buildConfig(){
+  document.getElementById('config-models').innerHTML=Object.keys(MODELS).map(name=>{
+    const m=MODELS[name];
+    return `<div class="model-toggle">
+      <div class="toggle-sw"><input type="checkbox" ${unlimitedModels[name]?'checked':''} onchange="unlimitedModels['${name}']=this.checked;saveUnlimited()"><span class="slider"></span></div>
+      <label>${name}</label>
+      <span class="model-cost">${m.credits===0?'FREE':m.credits+' kredytow'} | ${m.dur}</span>
+    </div>`;
+  }).join('');
+}
+
+const SCENE_MODEL_MAP = {
+  portrait_talking:  {best:['Kling 3.0','Kling 2.6','MiniMax Hailuo'],why:'Stabilna twarz, character lock, plynna animacja'},
+  product_reveal:    {best:['Kling 3.0','Veo 3.1','Sora 2'],why:'Fizyka obiektu, ostrosc detali, kinowe reveal'},
+  action_dynamic:    {best:['Kling 3.0','Sora 2','Kling o1'],why:'Fizyka ruchu, dynamika, interakcje obiektow'},
+  landscape_nature:  {best:['Veo 3.1','Sora 2','Wan 2.5'],why:'4K panoramy, symulacja swiata, szybkie prototypy'},
+  commercial_ad:     {best:['Kling 3.0','Veo 3.1','Seedance 1.5 Pro'],why:'Profesjonalna jakosc, kinowy look, audio w jednym przebiegu'},
+  abstract_artistic: {best:['Wan 2.5','MiniMax Hailuo','Kling o1'],why:'Szybkie iteracje, presety, rozumowanie zlozonych koncepcji'},
+  vfx_explosion:     {best:['Sora 2','Kling 3.0','Kling o1'],why:'Fizyka eksplozji, czasteczki, wielowarstwowe sceny'},
+  lipsync_dialogue:  {best:['Seedance 1.5 Pro'],why:'Natywny lip-sync — jedyny model z synchronizacja ust',extRequired:true},
+  music_video:       {best:['Seedance 1.5 Pro','Kling 3.0','Wan 2.5'],why:'Audio-driven, szybkie iteracje, dynamiczny ruch',extRequired:true},
+  timelapse:         {best:['Sora 2','Veo 3.1','Kling 3.0'],why:'Symulacja zmian w czasie, trwalosc obiektow'},
+};
+
+const EXT_TOOLS = {
+  lipsync:[
+    {name:'Sync.so',url:'https://sync.so',desc:'Studyjny lip-sync API'},
+    {name:'Vozo AI',url:'https://vozo.ai',desc:'Lip-sync wielu osob naraz (do 6)'},
+    {name:'Pika',url:'https://pika.art',desc:'Lip-sync do krotkich klipow'},
+    {name:'LipDub AI',url:'https://lipdub.ai',desc:'Realistyczny AI lip-sync'},
+  ],
+  audio_driven:[
+    {name:'Freebeat',url:'https://freebeat.ai',desc:'Choreografia pod beat + lip-sync + Suno'},
+    {name:'Neural Frames',url:'https://neuralframes.com',desc:'Wizualizery reaktywne na poszczegolne sciezki audio'},
+  ],
+  audio_gen:[
+    {name:'ElevenLabs',url:'https://elevenlabs.io',desc:'Generowanie glosu + efektow dzwiekowych'},
+    {name:'Suno',url:'https://suno.com',desc:'Generowanie muzyki AI'},
+    {name:'Udio',url:'https://udio.com',desc:'Generowanie muzyki AI'},
+  ]
+};
+
+function showRec(panel){
+  const tagId=panel==='i2v'?'i-scene-tags':'v-scene-tags';
+  const audioId=panel==='i2v'?'i-has-audio':'v-has-audio';
+  const recId=panel==='i2v'?'i-rec':'v-rec';
+  const selId=panel==='i2v'?'i-model':'v-model';
+  const scenes=Array.from(document.querySelectorAll(`#${tagId} .tag.sel`)).map(t=>t.dataset.v);
+  const hasAudio=document.getElementById(audioId).checked;
+
+  if(!scenes.length&&!hasAudio){
+    document.getElementById(recId).style.display='block';
+    document.getElementById(recId).innerHTML='<div class="rec-title">Wybierz typ sceny powyzej zeby zobaczyc rekomendacje</div>';
+    return;
+  }
+
+  let scores={},reasons=[],needExt=false;
+  scenes.forEach(s=>{const m=SCENE_MODEL_MAP[s];if(!m)return;reasons.push(m.why);if(m.extRequired)needExt=true;
+    m.best.forEach((n,i)=>{scores[n]=(scores[n]||0)+(3-i);});});
+
+  if(hasAudio){scores['Seedance 1.5 Pro']=(scores['Seedance 1.5 Pro']||0)+5;
+    reasons.push('Gotowe audio → Seedance (natywny audio-video) lub narzedzia zewnetrzne');needExt=true;}
+
+  let sorted=Object.entries(scores).sort((a,b)=>{
+    if(b[1]!==a[1])return b[1]-a[1];
+    return (unlimitedModels[b[0]]?1:0)-(unlimitedModels[a[0]]?1:0);});
+
+  let h='<div class="rec-title">Rekomendowane modele</div>';
+  sorted.forEach(([name],idx)=>{
+    h+=`<span class="rec-model${idx===0?' best':''}" onclick="document.getElementById('${selId}').value='${name}'">${name} ${unlimitedModels[name]?'<span class="badge-free">UNLIMITED</span>':'<span class="badge-credits">'+MODELS[name].credits+' kr</span>'}${idx===0?' ★':''}</span>`;});
+
+  Object.keys(unlimitedModels).forEach(n=>{if(unlimitedModels[n]&&!scores[n])
+    h+=`<span class="rec-model" onclick="document.getElementById('${selId}').value='${n}'">${n} <span class="badge-free">UNLIMITED</span> <span style="font-size:10px;color:var(--t3)">(alternatywa darmowa)</span></span>`;});
+
+  h+='<div class="rec-reason">'+[...new Set(reasons)].join(' | ')+'</div>';
+
+  if(needExt||hasAudio){
+    h+='<div class="rec-ext"><div class="rec-ext-title">Narzedzia zewnetrzne (gdy Higgsfield nie wystarczy):</div>';
+    if(hasAudio||scenes.includes('lipsync_dialogue'))EXT_TOOLS.lipsync.forEach(t=>h+=`<div class="ext-tool"><a href="${t.url}" target="_blank">${t.name}</a> — ${t.desc}</div>`);
+    if(hasAudio||scenes.includes('music_video'))EXT_TOOLS.audio_driven.forEach(t=>h+=`<div class="ext-tool"><a href="${t.url}" target="_blank">${t.name}</a> — ${t.desc}</div>`);
+    EXT_TOOLS.audio_gen.forEach(t=>h+=`<div class="ext-tool"><a href="${t.url}" target="_blank">${t.name}</a> — ${t.desc}</div>`);
+    h+='</div>';}
+
+  document.getElementById(recId).style.display='block';
+  document.getElementById(recId).innerHTML=h;
+}
+
+// ===== IMAGE LOADER =====
+function loadImg(input,previewId){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{const img=document.getElementById(previewId);img.src=e.target.result;img.style.display='block';};
+  r.readAsDataURL(f);
+}
+
+// ===== ANALYZE =====
+document.getElementById('az-has-audio').addEventListener('change',function(){
+  document.getElementById('az-audio-info').style.display=this.checked?'block':'none';
+});
+
+function genAnalyze(){
+  const d1=gv('az-desc1');
+  if(!d1){document.getElementById('az-out').textContent='Opisz co widzisz na pierwszej klatce.';return;}
+  const hasEnd=document.getElementById('az-use-end').checked,d2=gv('az-desc2'),
+    dur=gv('az-dur'),mood=gv('az-mood'),cam=gv('az-cam'),
+    hasAudio=document.getElementById('az-has-audio').checked,audioDesc=gv('az-audio-desc');
+
+  let p='';
+  if(hasEnd&&d2){
+    p+=`Starting from: ${d1}.\nTransitioning to: ${d2}.\n\nSmooth cinematic transition between start and end frame`;
+    if(cam)p+=`, ${cam}`;if(mood)p+=`, ${mood} atmosphere`;
+    p+='. Maintain subject consistency throughout. Natural motion, no warping or jitter.';
+  } else {
+    p+=`The image shows: ${d1}.\n\nBring this scene to life with subtle natural motion`;
+    if(cam)p+=`, ${cam}`;if(mood)p+=`, ${mood} atmosphere`;
+    p+='. Keep composition stable. Add breathing motion, environmental movement, subtle camera drift.';
+  }
+  if(hasAudio&&audioDesc)p+=`\n\nAudio-driven: sync motion to ${audioDesc}. Movements match rhythm and energy of audio.`;
+
+  let out=`── ANALIZA KLATKI → PROMPT ──\n── ${dur}s${hasEnd?' | START+END FRAME':''}${hasAudio?' | AUDIO-DRIVEN':''} ──\n\n${p}`;
+  document.getElementById('az-out').textContent=out;
+  autoHist('Analyze',out);
+
+  // Rec
+  const re=document.getElementById('az-rec');
+  let rh='<div class="rec-box"><div class="rec-title">Rekomendowany model</div>';
+  if(hasAudio){rh+=mb('Seedance 1.5 Pro',true);rh+='<div class="rec-reason">Gotowe audio → Seedance synchronizuje lip-sync i SFX</div>';
+    rh+='<div class="rec-ext"><div class="rec-ext-title">Lub zewnetrznie:</div>';
+    EXT_TOOLS.lipsync.concat(EXT_TOOLS.audio_driven).forEach(t=>rh+=`<div class="ext-tool"><a href="${t.url}" target="_blank">${t.name}</a> — ${t.desc}</div>`);rh+='</div>';
+  }else if(hasEnd){rh+=mb('Kling 3.0',true)+mb('Kling 2.6',false);rh+='<div class="rec-reason">Start+End Frame → Kling najlepiej obsluguje przejscia miedzy klatkami</div>';
+  }else{rh+=mb('Kling 3.0',true)+mb('Wan 2.5',false)+mb('MiniMax Hailuo',false);rh+='<div class="rec-reason">I2V z jednej klatki → stabilna animacja zachowujaca kompozycje</div>';}
+  Object.keys(unlimitedModels).forEach(n=>{if(unlimitedModels[n])rh+=mb(n,false);});
+  rh+='</div>';re.innerHTML=rh;
+}
+
+function mb(name,best){const m=MODELS[name],f=unlimitedModels[name];
+  return `<span class="rec-model${best?' best':''}">${name} ${f?'<span class="badge-free">UNLIMITED</span>':'<span class="badge-credits">'+m.credits+' kr</span>'}${best?' ★':''}</span>`;}
+
+// ===== TABS =====
+function sw(id){
+  const p=['t2i','i2v','t2v','campaign','json','analyze','config','hist'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',p[i]===id));
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+}
+
+// ===== TAGS =====
+document.querySelectorAll('.tags').forEach(c=>{c.querySelectorAll('.tag').forEach(t=>{t.addEventListener('click',()=>t.classList.toggle('sel'));});});
+
+// ===== HELPERS =====
+function gv(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+function gt(cid){return Array.from(document.querySelectorAll('#'+cid+' .tag.sel')).map(t=>t.dataset.v)}
+function cp(id){navigator.clipboard.writeText(document.getElementById(id).textContent);toast('Skopiowano!');}
+function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),1500);}
+document.getElementById('t-type').addEventListener('change',function(){document.getElementById('t-end-wrap').style.display=this.value==='both'?'block':'none';});
+
+// ===== T2I =====
+function genFrame(){
+  const subj=gv('t-subject');if(!subj){document.getElementById('t-out').textContent='Wpisz obiekt / postac.';return;}
+  const type=gv('t-type'),act=gv('t-action'),actEnd=gv('t-action-end'),bg=gv('t-bg'),extra=gv('t-extra');
+  const body=gt('t-body-tags'),lens=[...gt('t-lens-tags'),...gt('t-ana-tags')],focal=gt('t-focal-tags'),aper=gt('t-aper-tags'),light=gt('t-light-tags'),shot=gt('t-shot-tags');
+  function b(a){let p=[];if(shot.length)p.push(shot.join(', '));p.push(subj);if(a)p.push(a);if(bg)p.push(bg);
+    if(light.length)p.push(light.join(', '));if(body.length)p.push(body.join(', '));if(lens.length)p.push(lens.join(', '));
+    if(focal.length)p.push(focal.join(', '));if(aper.length)p.push(aper.join(', '));if(extra)p.push(extra);return p.join(', ');}
+  let out=type==='both'?'── START FRAME ──\n'+b(act)+'\n\n── END FRAME ──\n'+b(actEnd||act):b(act);
+  document.getElementById('t-out').textContent=out;autoHist('T2I',out);
+}
+
+// ===== I2V =====
+function genI2V(){
+  const act=gv('i-action');if(!act){document.getElementById('i-out').textContent='Wpisz akcje / sekwencje.';return;}
+  const model=gv('i-model'),ratio=gv('i-ratio'),dur=gv('i-dur'),qual=gv('i-qual'),shifts=gv('i-shifts'),tech=gv('i-tech'),neg=gv('i-neg');
+  const hasAudio=document.getElementById('i-has-audio').checked,audioDesc=gv('i-audio-desc');
+  const cams=[...gt('i-cam-tags'),...gt('i-cam-follow-tags'),...gt('i-cam-vert-tags'),...gt('i-cam2-tags'),...gt('i-cam3-tags'),...gt('i-cam-style-tags')];
+  const moods=gt('i-mood-tags');
+  let parts=[act];if(shifts)parts.push(shifts);if(cams.length)parts.push(cams.join(', '));
+  if(moods.length)parts.push(moods.join(', '));if(tech)parts.push(tech);
+  if(hasAudio&&audioDesc)parts.push('Audio-sync: '+audioDesc);
+  const f=unlimitedModels[model];
+  let out=`── I2V DIRECTOR | ${model}${f?' [UNLIMITED]':''} ──\n── ${ratio} | ${dur}s | ${qual}${hasAudio?' | AUDIO-DRIVEN':''} ──\n\n`;
+  out+=parts.join('. ');if(neg)out+='\n\n── NEGATIVE ──\n'+neg;
+  document.getElementById('i-out').textContent=out;autoHist('I2V',out);
+}
+
+// ===== T2V =====
+function genT2V(){
+  const scene=gv('v-scene');if(!scene){document.getElementById('v-out').textContent='Wpisz scene.';return;}
+  const model=gv('v-model'),ratio=gv('v-ratio'),dur=gv('v-dur'),qual=gv('v-qual'),
+    chars=gv('v-chars'),act=gv('v-action'),style=gv('v-style'),audio=gv('v-audio'),neg=gv('v-neg');
+  const hasAudio=document.getElementById('v-has-audio').checked,audioDesc=gv('v-audio-desc');
+  const cams=gt('v-cam-tags');
+  let p=scene;if(chars)p+='. '+chars;if(act)p+='. '+act;if(cams.length)p+='. '+cams.join(', ');
+  if(style)p+='. '+style;if(audio)p+='. Audio: '+audio;if(hasAudio&&audioDesc)p+='. Audio-sync: '+audioDesc;
+  const f=unlimitedModels[model];
+  let out=`── T2V 5-LAYER | ${model}${f?' [UNLIMITED]':''} ──\n── ${ratio} | ${dur}s | ${qual} ──\n\n${p}`;
+  if(neg)out+='\n\n── NEGATIVE ──\n'+neg;
+  document.getElementById('v-out').textContent=out;autoHist('T2V',out);
+}
+
+// ===== CAMPAIGN =====
+let shotN=0;
+function addShot(){
+  shotN++;const d=document.createElement('div');d.className='card';d.id='shot-'+shotN;
+  d.innerHTML=`<h3>Shot ${shotN}</h3>
+    <div class="row3">
+      <div><label>Nazwa shotu</label><input type="text" class="cs-name" placeholder="Np. Odkrycie"></div>
+      <div><label>Czas</label><input type="text" class="cs-time" placeholder="Np. 0:00-0:04"></div>
+      <div><label>Typ ujecia</label><select class="cs-shot">
+        <option>Sredni plan (Medium Shot)</option><option>Zbliżenie (Close-Up)</option><option>Srednie zbliżenie</option>
+        <option>Szeroki plan (Wide)</option><option>Ekstremalny detal (ECU)</option><option>Cala postac (Full Body)</option>
+        <option>Z dolu (Low Angle)</option><option>Z gory (High Angle)</option>
+      </select></div>
+    </div>
+    <label>Opis wizualny (Visual)</label><textarea class="cs-visual" rows="2" placeholder="Opisz co widac na ekranie w tym ujeciu..."></textarea>
+    <label>Dialog / narracja (Dialogue)</label><input type="text" class="cs-dialogue" placeholder="Np. (ciepla narracja) 'To zmienia wszystko.'">
+    <label>Dzwieki / muzyka (SFX)</label><input type="text" class="cs-sfx" placeholder="Np. cicha muzyka w tle, klikniecie przycisku, subtelny szum">
+    <div class="btns"><button class="btn btn-g btn-sm" onclick="this.closest('.card').remove()">Usun shot</button></div>`;
+  document.getElementById('c-shots').appendChild(d);
+}
+function genCampaign(){
+  const name=gv('c-name'),type=gv('c-type'),model=gv('c-model'),char=gv('c-char'),msg=gv('c-msg');
+  const shots=document.querySelectorAll('#c-shots .card');
+  if(!shots.length){document.getElementById('c-out').textContent='Dodaj przynajmniej jeden shot.';return;}
+  let out=type+(name?' — '+name:'')+'\nModel: '+model+'\n';
+  if(char)out+='Character: '+char+'\n';if(msg)out+='Message: '+msg+'\n';out+='\n';
+  shots.forEach((s,i)=>{
+    const n=s.querySelector('.cs-name').value.trim(),t=s.querySelector('.cs-time').value.trim(),
+      sh=s.querySelector('.cs-shot').value,vi=s.querySelector('.cs-visual').value.trim(),
+      di=s.querySelector('.cs-dialogue').value.trim(),sf=s.querySelector('.cs-sfx').value.trim();
+    out+=`Shot ${i+1}: ${n||'Untitled'}${t?' ('+t+')':''}\nVisual: ${sh}. ${vi||'(brak)'}\n`;
+    if(di)out+=`Dialogue: ${di}\n`;if(sf)out+=`SFX: ${sf}\n`;if(char)out+=`[Character: ${char}]\n`;out+='\n';});
+  document.getElementById('c-out').textContent=out.trim();autoHist('Campaign',out.trim());
+}
+
+// ===== JSON =====
+function genJSON(){
+  const sd=gv('j-scene-desc');if(!sd){document.getElementById('j-out').textContent='Wpisz opis sceny.';return;}
+  const obj={sequence_type:gv('j-seqtype'),duration_seconds:parseInt(gv('j-dur'))||10,
+    camera:{perspective:gv('j-persp'),lens:gv('j-lens'),stability:gv('j-cam-stab')},
+    scene:{description:sd,time:gv('j-scene-time')||undefined},
+    camera_movement:{motion:gv('j-cam-motion')||undefined,type:gv('j-cam-type')||undefined},movement:{},
+    environment:{world_description:gv('j-env-world')||undefined,materials_and_textures:gv('j-env-mat')||undefined,
+      lighting:gv('j-env-light')||undefined,atmosphere:gv('j-env-atmo')||undefined},
+    style:gv('j-style')||undefined,audio:{cues:gv('j-audio')?gv('j-audio').split(',').map(s=>s.trim()):undefined}};
+  const ms=gv('j-mov-start'),mp=gv('j-mov-path'),me=gv('j-mov-end');
+  if(ms)obj.movement.start_action=ms;if(mp)obj.movement.path_beats=mp.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(me)obj.movement.end_action=me;if(!Object.keys(obj.movement).length)delete obj.movement;
+  const fb=gv('j-forbidden');if(fb)obj.constraints={forbidden:fb.split(',').map(s=>s.trim())};
+  function cl(o){for(let k in o){if(o[k]===undefined)delete o[k];
+    else if(typeof o[k]==='object'&&!Array.isArray(o[k])){cl(o[k]);if(!Object.keys(o[k]).length)delete o[k];}}}
+  cl(obj);document.getElementById('j-out').textContent=JSON.stringify(obj,null,2);autoHist('JSON',JSON.stringify(obj,null,2));
+}
+
+// ===== HISTORY =====
+let hist=JSON.parse(localStorage.getItem('hf-hist')||'[]');renderHist();
+function autoHist(type,txt){hist.unshift({type,prompt:txt,time:new Date().toLocaleString('pl-PL')});
+  if(hist.length>50)hist.pop();localStorage.setItem('hf-hist',JSON.stringify(hist));renderHist();}
+function saveHist(){toast('Zapisano!');}
+function renderHist(){const el=document.getElementById('hist-list');
+  if(!hist.length){el.innerHTML='<p style="color:var(--t3);font-size:12px">Brak.</p>';return;}
+  el.innerHTML=hist.map((h,i)=>`<div style="padding:6px 0;border-bottom:1px solid var(--brd);cursor:pointer;font-size:12px" onclick="cpHist(${i})">
+    <span style="color:var(--y);font-weight:700">${h.type}</span><span style="color:var(--t3);float:right">${h.time}</span>
+    <div style="color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.prompt.substring(0,140)}</div></div>`).join('');}
+function cpHist(i){navigator.clipboard.writeText(hist[i].prompt);toast('Skopiowano!');}
+function clearHist(){hist=[];localStorage.removeItem('hf-hist');renderHist();}
+function exportHist(){const t=hist.map(h=>`[${h.type}] ${h.time}\n${h.prompt}\n${'─'.repeat(50)}`).join('\n\n');
+  navigator.clipboard.writeText(t);toast('Eksportowano!');}
+
+// ===== CLEAR =====
+function clearPanel(p){const el=document.getElementById('p-'+p);
+  el.querySelectorAll('input[type=text],textarea').forEach(e=>e.value='');
+  el.querySelectorAll('.tag').forEach(t=>t.classList.remove('sel'));
+  el.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+  el.querySelectorAll('input[type=checkbox]').forEach(c=>{c.checked=false;c.dispatchEvent(new Event('change'));});
+  if(p==='campaign'){document.getElementById('c-shots').innerHTML='';shotN=0;}
+  if(p==='analyze'){['az-preview1','az-preview2'].forEach(id=>{const img=document.getElementById(id);if(img)img.style.display='none';});}
+}
+
+// Init
+buildConfig();addShot();addShot();addShot();
+</script>
+</body>
+</html>
